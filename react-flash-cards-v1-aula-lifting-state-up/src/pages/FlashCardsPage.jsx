@@ -7,18 +7,33 @@ import Main from '../components/Main';
 import RadioButton from '../components/RadioButton';
 import { helperShuffleArray } from '../helpers/arrayHelpers';
 import { apiGetAllFlashCards } from '../services/apiService';
+import { ClipLoader } from "react-spinners";
+
+import { Tab, Tabs, TabList, TabPanel } from 'react-tabs';
+import 'react-tabs/style/react-tabs.css';
+
+
 
 export default function FlashCardsPage() {
   const [allCards, setAllCards] = useState([]);
-  const [studyCards, setStudyCards] = useState([])
+  const [studyCards, setStudyCards] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
   const [radioButtonShowTitle, setRadioButtonShowTitle] = useState(true);
 
   useEffect(() => {
     /* apiGetAllFlashCards().then(allFlashCards => {setAllCards(allFlashCards);}) */
 
     async function getAllCards(){
-      const backEndAllCards = await apiGetAllFlashCards();
+      try{
+        const backEndAllCards = await apiGetAllFlashCards();
       setAllCards(backEndAllCards)
+      setTimeout(()=> {setLoading(false);},500)
+      } catch(error){
+        setError(error.message);
+      }
+      
+      
     }
 
     getAllCards()
@@ -61,11 +76,19 @@ export default function FlashCardsPage() {
     setStudyCards(updatedCards);
   }
 
-  return (
-    <>
-      <Header>React Flash Cards</Header>
-      <Main>
-        <div className="text-center mb-4">
+  let mainJsx = (<div className='flex justify-center my-4'>
+  <ClipLoader/>
+  </div>)
+
+  if(error){
+    mainJsx = <p>{error}</p>
+  }
+
+  if(!loading){
+    mainJsx = <>
+
+
+    <div className="text-center mb-4">
           <Button onButtonClick={handleButtonClick}>Embaralhar cards</Button>
         </div>
 
@@ -103,7 +126,13 @@ export default function FlashCardsPage() {
             );
           })}
         </FlashCards>
-      </Main>
+    </>
+  }
+
+  return (
+    <>
+      <Header>React Flash Cards</Header>  
+      <Main>{mainJsx}</Main>
     </>
   );
 }
