@@ -10,43 +10,55 @@ import { apiGetAllFlashCards } from '../services/apiService';
 
 export default function FlashCardsPage() {
   const [allCards, setAllCards] = useState([]);
+  const [studyCards, setStudyCards] = useState([])
   const [radioButtonShowTitle, setRadioButtonShowTitle] = useState(true);
 
-  useEffect(async () => {
-    await apiGetAllFlashCards(allFlashCards => setAllCards(allFlashCards))
+  useEffect(() => {
+    /* apiGetAllFlashCards().then(allFlashCards => {setAllCards(allFlashCards);}) */
+
+    async function getAllCards(){
+      const backEndAllCards = await apiGetAllFlashCards();
+      setAllCards(backEndAllCards)
+    }
+
+    getAllCards()
   },[])
 
   function handleButtonClick() {
-    const shuffledCards = helperShuffleArray(allCards);
+    const shuffledCards = helperShuffleArray(studyCards);
 
-    setAllCards(shuffledCards);
+    setStudyCards(shuffledCards);
   }
+
+  useEffect(() => {
+    setStudyCards(allCards.map(card =>({... card, showTitle:true})))
+  }, [allCards])
 
   function handleRadioShowDescriptionClick() {
     // prettier-ignore
     const updatedCards = 
-      [...allCards].map(card => ({...card, showTitle: false}));
+      [...studyCards].map(card => ({...card, showTitle: false}));
 
-    setAllCards(updatedCards);
+      setStudyCards(updatedCards);
     setRadioButtonShowTitle(false);
   }
 
   function handleRadioShowTitleClick() {
     // prettier-ignore
     const updatedCards = 
-      [...allCards].map(card => ({...card, showTitle: true}));
+      [...studyCards].map(card => ({...card, showTitle: true}));
 
-    setAllCards(updatedCards);
+      setStudyCards(updatedCards);
 
     setRadioButtonShowTitle(true);
   }
 
   function handleToggleFlashCard(cardId) {
-    const updatedCards = [...allCards];
+    const updatedCards = [...studyCards];
     const cardIndex = updatedCards.findIndex(card => card.id === cardId);
     updatedCards[cardIndex].showTitle = !updatedCards[cardIndex].showTitle;
 
-    setAllCards(updatedCards);
+    setStudyCards(updatedCards);
   }
 
   return (
@@ -78,7 +90,7 @@ export default function FlashCardsPage() {
         </div>
 
         <FlashCards>
-          {allCards.map(({ id, title, description, showTitle }) => {
+          {studyCards.map(({ id, title, description, showTitle }) => {
             return (
               <FlashCard
                 key={id}
