@@ -11,6 +11,9 @@ import { ClipLoader } from "react-spinners";
 
 import { Tab, Tabs, TabList, TabPanel } from 'react-tabs';
 import 'react-tabs/style/react-tabs.css';
+import FlashCardItem from '../components/FlashCardItem';
+import FlashCardForm from '../components/FlashCardForm';
+import { getNewId } from '../services/idService';
 
 
 
@@ -19,6 +22,10 @@ export default function FlashCardsPage() {
   const [studyCards, setStudyCards] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [createMode, setCreateMode] = useState(true);
+  const [selectedTab, setSelectedTab] = useState(0);
+  const [selectedFashCard, setSelectedFashCard] = useState(null);
+
   const [radioButtonShowTitle, setRadioButtonShowTitle] = useState(true);
 
   useEffect(() => {
@@ -76,6 +83,43 @@ export default function FlashCardsPage() {
     setStudyCards(updatedCards);
   }
 
+  function handleDeleteFlashCard(cardId){
+
+    
+    setAllCards(allCards.filter(card => card.id !== cardId))
+  }
+
+  function handleEditFlashCard(card){
+    setCreateMode(false)
+    setSelectedTab(1)
+    setSelectedFashCard(card)
+  }
+
+  function handleTabSelect(tabIndex){
+    setSelectedTab(tabIndex);
+  }
+
+  function handleNewFlashCard(){
+    setCreateMode(true)
+    setSelectedFashCard(null)
+  }
+
+  function handlePersist(title, description){
+    if(createMode){
+      setAllCards([...allCards, {id:  getNewId(), title, description}])
+    } else{
+      {setAllCards(allCards.map(card => {
+        if(card.id === selectedFashCard.id){
+          return {...card, title, description};
+        }
+        return card;
+      }))
+      setSelectedFashCard(null)
+      setCreateMode(true)
+    }
+    }
+  }
+
   let mainJsx = (<div className='flex justify-center my-4'>
   <ClipLoader/>
   </div>)
@@ -87,8 +131,31 @@ export default function FlashCardsPage() {
   if(!loading){
     mainJsx = <>
 
+    <Tabs selectedIndex={selectedTab} onSelect={handleTabSelect}>
+        <TabList>
+          <Tab>Listagem</Tab>
+          <Tab>Cadastro</Tab>
+          <Tab>Estudo</Tab>
+        </TabList>
 
-    <div className="text-center mb-4">
+        <TabPanel>
+          {allCards.map(flashcard=>
+          <FlashCardItem 
+          key={flashcard.id} 
+          onDelete ={handleDeleteFlashCard}
+          onEdit ={handleEditFlashCard}
+          >
+            {flashcard}</FlashCardItem>)}
+        </TabPanel>
+
+        <TabPanel>
+          <div className='my-4'><Button onButtonClick={handleNewFlashCard}>Novo FlashCard</Button></div>
+          
+          <FlashCardForm createMode={createMode} onPersist={handlePersist}>{selectedFashCard}</FlashCardForm>
+        </TabPanel>
+
+        <TabPanel>
+        <div className="text-center mb-4">
           <Button onButtonClick={handleButtonClick}>Embaralhar cards</Button>
         </div>
 
@@ -126,6 +193,10 @@ export default function FlashCardsPage() {
             );
           })}
         </FlashCards>
+        </TabPanel>
+      </Tabs>
+
+    
     </>
   }
 

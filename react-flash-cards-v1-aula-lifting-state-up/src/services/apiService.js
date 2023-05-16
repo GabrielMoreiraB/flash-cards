@@ -6,3 +6,7 @@ export async function apiGetAllFlashCards() {
     const allFlashCards = await get(BACKAND_URL);
     return allFlashCards
 }
+
+export async function apiGetAllFlashCard(cardId){
+    
+}
