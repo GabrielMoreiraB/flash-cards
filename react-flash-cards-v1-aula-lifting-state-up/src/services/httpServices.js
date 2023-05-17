@@ -1,6 +1,13 @@
 import axios from 'axios';
 
-export async function get(url){
-    const {data} = await axios.get(url);
+const axiosInstance = axios.create({baseURL:'http://localhost:3001', timeout:10000});
+
+export async function read(url){
+    const {data} = await axiosInstance.get(url);
     return data;
+}
+
+export async function exclude(url, id){
+    const data = await axiosInstance.delete(url)
+    console.log(data);
 }

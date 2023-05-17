@@ -85,7 +85,7 @@ export default function FlashCardsPage() {
 
   function handleDeleteFlashCard(cardId){
 
-    
+    /* apiDeleteFlashCard(cardId);  */
     setAllCards(allCards.filter(card => card.id !== cardId))
   }
 
